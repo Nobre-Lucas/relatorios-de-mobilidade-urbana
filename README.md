@@ -1,4 +1,4 @@
-# TransitCheck — Auditor de Mobilidade Urbana
+# RelatoriosMobilidadeBrasil — Auditor de Mobilidade Urbana
 
 Documento contendo arquitetura técnica, backlog priorizado, estrutura de pastas, especificação de APIs, modelo de dados, critérios de validação e plano de testes automatizados (aceitação, integração, regressão).
 
@@ -8,9 +8,9 @@ Documento contendo arquitetura técnica, backlog priorizado, estrutura de pastas
 
 **Objetivo:** analisar comunicados, notícias e relatórios públicos sobre transporte urbano e gerar laudos objetivos e auditáveis que avaliem impacto social, acessibilidade e riscos para trabalhadores e populações periféricas.
 
-**Princípios:** objetividade, regras explícitas, auditabilidade, testabilidade, sem geração criativa.
+**Princípios:** objetividade, regras explícitas, auditabilidade, testabilidade, objetividade acima de criatividade.
 
-**Entrega mínima:** API que recebe texto/PDF e retorna laudo JSON + interface Streamlit simples + armazenamento de logs (Postgres).
+**Entrega mínima:** API que recebe texto/PDF/HTML e retorna laudo JSON + interface Streamlit simples + armazenamento de logs (Postgres).
 
 ---
 
@@ -74,7 +74,7 @@ Documento contendo arquitetura técnica, backlog priorizado, estrutura de pastas
 ```json
 {
   "source_id": "string (opcional)",
-  "input_type": "text|pdf|docx",
+  "input_type": "text|pdf|docx|html",
   "content": "..." (base64 or plain text),
   "meta": {"origem":"noticia|comunicado|relatorio","data_publicacao":"YYYY-MM-DD"}
 }
@@ -177,41 +177,7 @@ Então status deve ser "needs_more_info"
 
 ---
 
-## 10. Backlog priorizado (MVP -> 4 sprints)
-
-**Sprint 0 (setup dev env, 3 dias)**
-- Docker compose com Postgres + pgvector + Ollama stub
-- Repositórios iniciais spring-api e agent-service
-- CI básico
-
-**Sprint 1 (MVP básico, 1 semana)**
-- Endpoint POST /analyze (aceita texto)
-- Agent-service: regex extraction (tarifa, datas, bairros simples)
-- Laudo JSON básico
-- Persistência de audit_inputs + analysis_results
-- Testes unitários básicos
-
-**Sprint 2 (validação e regras, 1 semana)**
-- Implementar ruleset no DB e engine de aplicação de regras
-- Regras: aumento tarifa, corte linha, expansão
-- Testes de aceitação (3 cenários Gherkin)
-- Streamlit mínimo para upload e visualizar laudo
-
-**Sprint 3 (LLM + confiança, 1 semana)**
-- Integrar Ollama para interpretar frases ambíguas
-- Confidence scoring básico
-- Regressão com dataset de 20 documentos
-- Melhorias no UI
-
-**Sprint 4 (hardening e docs, 1 semana)**
-- Testes de integração completa (Spring <> Agent <> DB)
-- CI rodando testes de aceitação
-- Documentação e runbook de execução on-prem
-- Entrega final e README com instruções de demo
-
----
-
-## 11. Exemplo de fixtures e casos de teste (pequena amostra)
+## 10. Exemplo de fixtures e casos de teste (pequena amostra)
 
 **Fixture 1 — comunicado simples**
 ```
@@ -233,7 +199,7 @@ Esperado: status = needs_more_info; laudo.extracted quase vazio.
 
 ---
 
-## 12. Métricas e indicadores para demo
+## 11. Métricas e indicadores para demo
 
 - **Taxa de extração correta**: % de campos-chave extraídos corretamente (tarifa, bairros, datas) no conjunto de teste.
 - **Falsos positivos nas classificações**: casos onde impacto_social difere da expectativa.
@@ -242,7 +208,7 @@ Esperado: status = needs_more_info; laudo.extracted quase vazio.
 
 ---
 
-## 13. Segurança e privacidade
+## 12. Segurança e privacidade
 
 - Não enviar dados sensíveis para serviços externos; usar Ollama on-prem ou stub.
 - Logs devem mascarar informações pessoais identificáveis (se houver) — regra no pipeline de ingestão.
@@ -250,7 +216,7 @@ Esperado: status = needs_more_info; laudo.extracted quase vazio.
 
 ---
 
-## 14. Runbook de demo (passo-a-passo)
+## 13. Runbook de demo (passo-a-passo)
 
 1. `docker compose up` (Postgres + Ollama stub + spring-api + agent-service)
 2. Subir Streamlit: `streamlit run app.py`.
@@ -260,16 +226,10 @@ Esperado: status = needs_more_info; laudo.extracted quase vazio.
 
 ---
 
-## 15. Próximos passos / melhorias futuras
+## 14. Próximos passos / melhorias futuras
 
 - Integração com bases socioeconômicas (IBGE) para checar renda por bairro.
 - Dashboard analítico agregando múltiplas análises (heatmap de impacto por região).
 - Interface para managers editarem regras no DB e reavaliar análises.
 - Detector de mudança de narrativa (comparar versão atual vs comunicado anterior para detectar retrocesso de políticas).
-
----
-
-
-
-**Fim do documento.**
-
+- Scrapping em sites de notícias/portais oficiais para alertas com pouco atraso.
