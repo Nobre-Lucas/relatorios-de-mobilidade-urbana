@@ -4,6 +4,14 @@ Documento contendo arquitetura técnica, backlog priorizado, estrutura de pastas
 
 ---
 
+## 0. Problema
+
+O direito ao transporte é um direito social previsto pela constituição e que tem influência sobre outros direitos, como o de ir e vir. Entretanto, pode ser observar que em Belém do Pará um transporte público de qualidade é um sonho distante para a maior parte da população paraense.
+
+Não faltam aumentos de tarifa, ônibus sucateados, motoristas e cobradores mal treinados e sem treinamento, estressados com as péssimas condições de trabalho que são submetidos. Há pouco tempo, inclusive, nos "geladões", ônibus com ar-condicionados, os motoristas agora exercem também as funções de cobradores, diminuindo a velocidade do transporte para os passageiros e para motoristas de carros pessoais também, além de acumular mais uma carga de estresse sobre o trabalhador.
+
+Nesse contexto, faltam ferramentas apropriadas para que os cidadãos e entidades civís interessadas possam monitorar a qualidade do transporte na região, como agregadores de notícias e painéis de inteligência de dados.
+
 ## 1. Visão geral
 
 **Objetivo:** analisar comunicados, notícias e relatórios públicos sobre transporte urbano e gerar laudos objetivos e auditáveis que avaliem impacto social, acessibilidade e riscos para trabalhadores e populações periféricas.
