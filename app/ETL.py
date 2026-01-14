@@ -1,5 +1,16 @@
+from reportlab.platypus import SimpleDocTemplate, Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.pagesizes import A4
+
 import pandas as pd
+
+import calendar
+import locale
+
 import re
+
+
+locale.setlocale(locale.LC_TIME, "pt_BR.UTF-8")
 
 
 def clean_lines(lines: list[str]) -> list[str]:
@@ -80,10 +91,53 @@ def lines_to_dataframe(lines: list[str]) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def dataframe_to_markdown(df: pd.DataFrame, linha_onibus: str) -> str:
+    md = [f"# Linha de Ônibus ({linha_onibus})\n"]
+
+    df = df.sort_values(
+        ["ano", "mês", "dia", "hora", "minuto"]
+    )
+
+    for (ano, mes, dia), g_day in df.groupby(["ano", "mês", "dia"]):
+        nome_mes = calendar.month_name[mes]
+        md.append(f"## {dia} de {nome_mes} de {ano}\n")
+
+        for hora, g_hour in g_day.groupby("hora"):
+            md.append(f"### {hora:02d}h\n")
+            for _, row in g_hour.iterrows():
+                md.append(
+                    f"- {row['hora']:02d}:{row['minuto']:02d} - {row['mensagem']}"
+                )
+            md.append("")
+
+    return "\n".join(md)
+
+
+def markdown_to_pdf(markdown_text: str, output_pdf: str):
+    doc = SimpleDocTemplate(output_pdf, pagesize=A4)
+    styles = getSampleStyleSheet()
+    story = []
+
+    for line in markdown_text.split("\n"):
+        if line.startswith("# "):
+            story.append(Paragraph(f"<b>{line[2:]}</b>", styles["Title"]))
+        elif line.startswith("## "):
+            story.append(Paragraph(f"<b>{line[3:]}</b>", styles["Heading2"]))
+        elif line.startswith("### "):
+            story.append(Paragraph(f"<b>{line[4:]}</b>", styles["Heading3"]))
+        elif line.startswith("- "):
+            story.append(Paragraph(line[2:], styles["Normal"]))
+        else:
+            story.append(Paragraph(line, styles["Normal"]))
+
+    doc.build(story)
+
 
 if __name__ == "__main__":
+
+    data_path = "../data/"
     
-    with open('../data/data.txt', 'r') as data:
+    with open(f"{data_path}data.txt", "r") as data:
         lines = data.readlines()
         data.close()
 
@@ -91,3 +145,13 @@ if __name__ == "__main__":
     lines_clean = clean_lines(lines)
     message_history = lines_to_dataframe(lines_clean)
     message_history.to_csv('../data/message_history.csv', index=False)
+
+    markdown_text = dataframe_to_markdown(
+        message_history,
+        "904 - Cidade Nova 8 - Presidente Vargas"
+    )
+
+    with open(f"{data_path}message_history.md", "w", encoding="utf-8") as f:
+        f.write(markdown_text)
+
+    markdown_to_pdf(markdown_text, f"{data_path}message_history.pdf")
